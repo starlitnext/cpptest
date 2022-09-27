@@ -1,0 +1,8 @@
+[submodule "3rd/pybind11"]
+	path = 3rd/pybind11
+	url = https://github.com/pybind/pybind11.git
+	branch = v2.9.2
+[submodule "3rd/asio"]
+	path = 3rd/asio
+	url = https://github.com/chriskohlhoff/asio.git
+	branch = asio-1-24-0
