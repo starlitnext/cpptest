@@ -11,7 +11,7 @@ CXX20 := g++-10 -std=c++20
 CXXFLAGS := -g3 -O2 -Wall
 SHARED_FLAGS = -fPIC --shared
 PYBIND_CFLAGS = -I$(EXTERNAL)/pybind11/include -I$(PYTHON_INCLUDE)
-ASIO_CFLAGS = -fcoroutines -DASIO_STANDALONE -DASIO_ENABLE_HANDLER_TRACKING -I$(EXTERNAL)/asio/asio/include
+ASIO_CFLAGS = -fcoroutines -DASIO_STANDALONE -I$(EXTERNAL)/asio/asio/include
 ASIO_LDFLAGS = -lpthread
 
 all: build_dir pybind11_example asio_example
@@ -33,12 +33,16 @@ $(BUILD_DIR)/pybind11_helloworld.so: $(EXAMPLE)/pybind11_test/pybind11_helloworl
 
 # =================== asio examples start =================== 
 asio_example: $(BUILD_DIR)/http_server $(BUILD_DIR)/co_echo_srv
+asio_example: $(BUILD_DIR)/echo_cli
 
 $(BUILD_DIR)/http_server: $(EXAMPLE)/asiotest/http_server.cpp
 	$(CXX20) $(CXXFLAGS) $(ASIO_CFLAGS) $^ -o $@ $(ASIO_LDFLAGS)
 
-$(BUILD_DIR)/co_echo_srv: $(EXAMPLE)/asiotest/co_echo_srv.cpp
+$(BUILD_DIR)/echo_cli: $(EXAMPLE)/asiotest/echo_cli.cpp
 	$(CXX20) $(CXXFLAGS) $(ASIO_CFLAGS) $^ -o $@ $(ASIO_LDFLAGS)
+
+$(BUILD_DIR)/co_echo_srv: $(EXAMPLE)/asiotest/co_echo_srv.cpp
+	$(CXX20) $(CXXFLAGS) $(ASIO_CFLAGS) -DASIO_ENABLE_HANDLER_TRACKING $^ -o $@ $(ASIO_LDFLAGS)
 
 # =================== asio examples end =================== 
 
