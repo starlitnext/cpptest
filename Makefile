@@ -8,7 +8,7 @@ PYTHON_INCLUDE := /usr/include/python2.7
 
 CXX14 := g++-10 -std=c++14
 CXX20 := g++-10 -std=c++20
-CXXFLAGS := -g3 -O2 -Wall
+CXXFLAGS := -g3 -O2 -Wall -Wno-unused-result
 SHARED_FLAGS = -fPIC --shared
 PYBIND_CFLAGS = -I$(EXTERNAL)/pybind11/include -I$(PYTHON_INCLUDE)
 ASIO_CFLAGS = -fcoroutines -DASIO_STANDALONE -I$(EXTERNAL)/asio/asio/include
@@ -17,7 +17,7 @@ ASIO_LDFLAGS = -lpthread
 all: build_dir pybind11_example asio_example
 
 build_dir:
-	-mkdir $(BUILD_DIR)
+	mkdir -p $(BUILD_DIR)
 
 # =================== pybind11 examples start =================== 
 pybind11_example: $(BUILD_DIR)/pybind11_classes.so $(BUILD_DIR)/pybind11_helloworld.so
@@ -32,19 +32,27 @@ $(BUILD_DIR)/pybind11_helloworld.so: $(EXAMPLE)/pybind11_test/pybind11_helloworl
 
 
 # =================== asio examples start =================== 
-asio_example: $(BUILD_DIR)/http_server $(BUILD_DIR)/co_echo_srv
-asio_example: $(BUILD_DIR)/echo_cli
+# asio_example: $(BUILD_DIR)/http_server $(BUILD_DIR)/co_echo_srv
+# asio_example: $(BUILD_DIR)/echo_cli
 
-$(BUILD_DIR)/http_server: $(EXAMPLE)/asiotest/http_server.cpp
-	$(CXX20) $(CXXFLAGS) $(ASIO_CFLAGS) $^ -o $@ $(ASIO_LDFLAGS)
+# $(BUILD_DIR)/http_server: $(EXAMPLE)/asiotest/http_server.cpp
+# 	$(CXX20) $(CXXFLAGS) $(ASIO_CFLAGS) $^ -o $@ $(ASIO_LDFLAGS)
 
-$(BUILD_DIR)/echo_cli: $(EXAMPLE)/asiotest/echo_cli.cpp
-	$(CXX20) $(CXXFLAGS) $(ASIO_CFLAGS) $^ -o $@ $(ASIO_LDFLAGS)
+# $(BUILD_DIR)/echo_cli: $(EXAMPLE)/asiotest/echo_cli.cpp
+# 	$(CXX20) $(CXXFLAGS) $(ASIO_CFLAGS) $^ -o $@ $(ASIO_LDFLAGS)
 
-$(BUILD_DIR)/co_echo_srv: $(EXAMPLE)/asiotest/co_echo_srv.cpp
-	$(CXX20) $(CXXFLAGS) $(ASIO_CFLAGS) -DASIO_ENABLE_HANDLER_TRACKING $^ -o $@ $(ASIO_LDFLAGS)
+# $(BUILD_DIR)/co_echo_srv: $(EXAMPLE)/asiotest/co_echo_srv.cpp
+# 	$(CXX20) $(CXXFLAGS) $(ASIO_CFLAGS) -DASIO_ENABLE_HANDLER_TRACKING $^ -o $@ $(ASIO_LDFLAGS)
+
+ASIOTEST = $(TOP)/example/asiotest
+ASIO_PROGRAMS := $(patsubst $(ASIOTEST)/%.cpp,$(BUILD_DIR)/%,$(wildcard $(ASIOTEST)/*.cpp))
+asio_example: $(ASIO_PROGRAMS)
+$(ASIO_PROGRAMS):
+	@make build_dir
+	$(CXX20) $(CXXFLAGS) $(ASIO_CFLAGS) $(patsubst $(BUILD_DIR)/%,$(ASIOTEST)/%.cpp,$@) -o $@ $(ASIO_LDFLAGS)
 
 # =================== asio examples end =================== 
+
 
 clean:
 	rm -rf $(BUILD_DIR)

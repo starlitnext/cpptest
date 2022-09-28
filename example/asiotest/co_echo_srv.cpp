@@ -1,3 +1,4 @@
+#define ASIO_ENABLE_HANDLER_TRACKING
 
 #include <iostream>
 #include <asio/as_tuple.hpp>
