@@ -6,7 +6,8 @@
                 "${workspaceFolder}/**",
                 "${workspaceFolder}/3rd/asio/asio/include",
                 "${workspaceFolder}/3rd/pybind11/include",
-                "/usr/include/python2.7"
+                "/usr/include/python2.7",
+                "${workspaceFolder}/3rd/protobuf_install/include"
             ],
             "defines": [],
             "compilerPath": "/usr/bin/g++-10",

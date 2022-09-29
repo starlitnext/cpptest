@@ -13,6 +13,8 @@ SHARED_FLAGS = -fPIC --shared
 PYBIND_CFLAGS = -I$(EXTERNAL)/pybind11/include -I$(PYTHON_INCLUDE)
 ASIO_CFLAGS = -fcoroutines -DASIO_STANDALONE -I$(EXTERNAL)/asio/asio/include
 ASIO_LDFLAGS = -lpthread
+PROTOBUF_CFLAGS = -I$(EXTERNAL)/protobuf_install/include
+PROTOBUF_LDFLAGS = -L$(EXTERNAL)/protobuf_install/lib -Wl,-rpath=$(EXTERNAL)/protobuf_install/lib -lpthread -lprotobuf
 
 all: build_dir pybind11_example asio_example
 
@@ -54,16 +56,26 @@ $(ASIO_PROGRAMS):
 
 # =================== asio examples end =================== 
 
-# =================== asio examples protobuf =================== 
+# =================== protobuf examples begin =================== 
 
+# 跑protobuf的例子时需要先 build protobuf，跑一次就行，不会提交git
 build_protobuf:
 	cd $(EXTERNAL)/protobuf && git submodule update --init --recursive && ./autogen.sh
+	cd $(EXTERNAL) && mkdir -p protobuf_install
+	cd $(EXTERNAL)/protobuf && ./configure --prefix=$(EXTERNAL)/protobuf_install
+	cd $(EXTERNAL)/protobuf && make check && make install
 
+# 使用动态链接
+addressbook_write: $(EXAMPLE)/protobuf/addressbook_write.cpp $(EXAMPLE)/protobuf/addressbook.pb.cc
+	$(EXTERNAL)/protobuf_install/bin/protoc -I=$(EXAMPLE)/protobuf --cpp_out=$(EXAMPLE)/protobuf $(EXAMPLE)/protobuf/addressbook.proto
+	$(CXX20) $(CXXFLAGS) $(PROTOBUF_CFLAGS) $^ -o $(BUILD_DIR)/$@ $(PROTOBUF_LDFLAGS)
 
-gen_address_proto:
-	$(EXTERNAL)/protobuf/protoc -I=$(EXAMPLE)/protobuf --cpp_out=$(EXAMPLE)/protobuf $(EXAMPLE)/protobuf/addressbook.proto
+# 使用静态链接
+addressbook_read: $(EXAMPLE)/protobuf/addressbook_read.cpp $(EXAMPLE)/protobuf/addressbook.pb.cc $(EXTERNAL)/protobuf_install/lib/libprotobuf.a
+	$(EXTERNAL)/protobuf_install/bin/protoc -I=$(EXAMPLE)/protobuf --cpp_out=$(EXAMPLE)/protobuf $(EXAMPLE)/protobuf/addressbook.proto
+	$(CXX20) $(CXXFLAGS) $(PROTOBUF_CFLAGS) $^ -o $(BUILD_DIR)/$@ -lpthread
 
-# =================== asio examples end =================== 
+# =================== protobuf examples end =================== 
 
 
 clean:
