@@ -17,7 +17,8 @@ ASIO_LDFLAGS = -lpthread
 all: build_dir pybind11_example asio_example
 
 build_dir:
-	mkdir -p $(BUILD_DIR)
+	@echo "create build dir"
+	@mkdir -p $(BUILD_DIR)
 
 # =================== pybind11 examples start =================== 
 pybind11_example: $(BUILD_DIR)/pybind11_classes.so $(BUILD_DIR)/pybind11_helloworld.so
@@ -45,11 +46,22 @@ $(BUILD_DIR)/pybind11_helloworld.so: $(EXAMPLE)/pybind11_test/pybind11_helloworl
 # 	$(CXX20) $(CXXFLAGS) $(ASIO_CFLAGS) -DASIO_ENABLE_HANDLER_TRACKING $^ -o $@ $(ASIO_LDFLAGS)
 
 ASIOTEST = $(TOP)/example/asiotest
-ASIO_PROGRAMS := $(patsubst $(ASIOTEST)/%.cpp,$(BUILD_DIR)/%,$(wildcard $(ASIOTEST)/*.cpp))
+ASIO_PROGRAMS := $(patsubst $(ASIOTEST)/%.cpp,%,$(wildcard $(ASIOTEST)/*.cpp))
 asio_example: $(ASIO_PROGRAMS)
 $(ASIO_PROGRAMS):
-	@make build_dir
-	$(CXX20) $(CXXFLAGS) $(ASIO_CFLAGS) $(patsubst $(BUILD_DIR)/%,$(ASIOTEST)/%.cpp,$@) -o $@ $(ASIO_LDFLAGS)
+	@$(MAKE) build_dir
+	$(CXX20) $(CXXFLAGS) $(ASIO_CFLAGS) $(ASIOTEST)/$@.cpp -o $(BUILD_DIR)/$@ $(ASIO_LDFLAGS)
+
+# =================== asio examples end =================== 
+
+# =================== asio examples protobuf =================== 
+
+build_protobuf:
+	cd $(EXTERNAL)/protobuf && git submodule update --init --recursive && ./autogen.sh
+
+
+gen_address_proto:
+	$(EXTERNAL)/protobuf/protoc -I=$(EXAMPLE)/protobuf --cpp_out=$(EXAMPLE)/protobuf $(EXAMPLE)/protobuf/addressbook.proto
 
 # =================== asio examples end =================== 
 

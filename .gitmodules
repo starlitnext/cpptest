@@ -6,3 +6,7 @@
 	path = 3rd/asio
 	url = https://github.com/chriskohlhoff/asio.git
 	branch = asio-1-24-0
+[submodule "3rd/protobuf"]
+	path = 3rd/protobuf
+	url = https://github.com/protocolbuffers/protobuf.git
+	branch = v3.21.6
