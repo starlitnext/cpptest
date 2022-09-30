@@ -1,3 +1,9 @@
+/*
+ * @Author: silentwind vipxxq@foxmail.com
+ * @Date: 2022-09-29 17:46:47
+ * @LastEditors: silentwind vipxxq@foxmail.com
+ * @LastEditTime: 2022-09-30 17:23:13
+ */
 
 #include <iostream>
 #include "EchoService.pb.h"
@@ -6,16 +12,13 @@
 int main()
 {
     RpcChannel channel;
-    channel.init("127.0.0.1", 8000);
 
     echo::EchoRequest request;
     echo::EchoResponse response;
     request.set_msg("hello, rpc.");
 
     echo::EchoServer_Stub stub(&channel);
-    RpcController controller;
-    stub.Echo(&controller, &request, &response, NULL);
-    std::cout << "resp:" << response.msg() << std::endl;
+    stub.Echo(nullptr, &request, nullptr, nullptr);
 
     return 0;
 }

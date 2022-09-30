@@ -2,7 +2,7 @@
  * @Author: silentwind vipxxq@foxmail.com
  * @Date: 2022-09-30 11:48:00
  * @LastEditors: silentwind vipxxq@foxmail.com
- * @LastEditTime: 2022-09-30 18:00:17
+ * @LastEditTime: 2022-09-30 18:00:45
  * @Description: 按bit的方式读写buffer
  */
 #ifndef MEMORY_BIT_STREAM_HPP
