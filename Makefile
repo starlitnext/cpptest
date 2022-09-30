@@ -88,6 +88,11 @@ rpc_echo_srv: $(EXAMPLE)/rpctest/EchoServer.cpp $(EXAMPLE)/rpctest/RpcMeta.pb.cc
 
 # =================== protobuf examples end =================== 
 
+# =================== memory stream examples end =================== 
+bit_stream_test: $(EXAMPLE)/memory_stream/BitStreamTest.cpp
+	$(CXX20) $(CXXFLAGS) $^ -o $(BUILD_DIR)/$@
+# =================== memory stream examples end =================== 
+
 
 clean:
 	rm -rf $(BUILD_DIR)
