@@ -2,11 +2,19 @@
  * @Author: silentwind vipxxq@foxmail.com
  * @Date: 2022-09-30 11:48:00
  * @LastEditors: silentwind vipxxq@foxmail.com
- * @LastEditTime: 2022-09-30 16:36:15
+ * @LastEditTime: 2022-09-30 17:13:53
  * @Description: 按bit的方式读写buffer
  */
 #ifndef MEMORY_BIT_STREAM_HPP
 #define MEMORY_BIT_STREAM_HPP
+
+// TODO 其它判断字节序的办法
+// 目前只支持gnuc
+#if defined(__GNUC__)
+# if __BYTE_ORDER == __BIG_ENDIAN
+#  define STREAM_BIG_ENDIANNESS
+# endif
+#endif
 
 #include <cstdint>
 #include <cstdlib>
@@ -53,6 +61,16 @@ public:
 };
 
 template<typename T, size_t Size> class ByteSwapper;
+
+template <typename T>
+class ByteSwapper< T, 1 >
+{
+public:
+	T Swap( T inData ) const
+	{
+		return inData;
+	}
+};
 
 template<typename T>
 class ByteSwapper<T, 2>
@@ -129,9 +147,9 @@ public:
         // 大端     0x12    0x34    0x56    0x78
         // 假设我们只想要写入8bit，则小端写入 0x78 而大端写入 0x12
         // 要支持大端的话，这里需要先交换bit再写
-    #ifdef BIG_ENDIAN
+    #ifdef STREAM_BIG_ENDIANNESS
         in_data = ByteSwap(in_data);
-    #endif // BIG_ENDIAN
+    #endif // STREAM_BIG_ENDIANNESS
         WriteBits(&in_data, bit_count);
     }
 
@@ -248,9 +266,9 @@ public:
         // 低位放在低地址，高位放在高地址
         // 如果系统是大端，则需要交换一下字节序
         ReadBits(&in_data, bit_count);
-#ifdef BIG_ENDIAN
+    #ifdef STREAM_BIG_ENDIANNESS
         in_data = ByteSwap(in_data);
-#endif // BIG_ENDIAN
+    #endif // STREAM_BIG_ENDIANNESS
     }
 
     void Read(bool& out_data) { ReadBits(&out_data, 1); }
@@ -304,6 +322,20 @@ void InputMemoryBitStream::ReadBits(void* out_data, uint32_t bit_count)
     {
         ReadBits(*dest_byte, bit_count);
     }
+}
+
+template<typename T>
+OutputMemoryBitStream& operator >>(OutputMemoryBitStream& stream, const T& val)
+{
+    stream.Write(val);
+    return stream;
+}
+
+template<typename T>
+InputMemoryBitStream& operator >>(InputMemoryBitStream& stream, T& val)
+{
+    stream.Read(val);
+    return stream;
 }
 
 #endif // !MEMORY_BIT_STREAM_HPP

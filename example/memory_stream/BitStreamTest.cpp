@@ -2,7 +2,7 @@
  * @Author: silentwind vipxxq@foxmail.com
  * @Date: 2022-09-30 15:40:59
  * @LastEditors: silentwind vipxxq@foxmail.com
- * @LastEditTime: 2022-09-30 15:58:28
+ * @LastEditTime: 2022-09-30 16:58:09
  */
 
 #include <iostream>
@@ -15,6 +15,7 @@ int main(int argc, char const *argv[])
     writer.Write(52, 6);
     std::string s("hello");
     writer.Write(s);
+    writer >> 1000 >> 1024;
     std::cout << writer.GetBitLength() << std::endl;
 
     char buffer[1024];
@@ -26,9 +27,13 @@ int main(int argc, char const *argv[])
     reader.Read(a, 5);
     reader.Read(b, 6);
     reader.Read(ss);
-    std::cout << "a:" << a << std::endl;
-    std::cout << "b:" << b << std::endl;
+    int c = 0, d = 0;
+    reader >> c >> d;
+    std::cout << "a: " << a << std::endl;
+    std::cout << "b: " << b << std::endl;
     std::cout << "ss:" << ss << std::endl;
+    std::cout << "c:" << c << std::endl;
+    std::cout << "d:" << d << std::endl;
     
     return 0;
 }
