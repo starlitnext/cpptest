@@ -13,6 +13,7 @@ SHARED_FLAGS = -fPIC --shared
 PYBIND_CFLAGS = -I$(EXTERNAL)/pybind11/include -I$(PYTHON_INCLUDE)
 ASIO_CFLAGS = -fcoroutines -DASIO_STANDALONE -I$(EXTERNAL)/asio/asio/include
 ASIO_LDFLAGS = -lpthread
+PROTOC := $(EXTERNAL)/protobuf_install/bin/protoc
 PROTOBUF_CFLAGS = -I$(EXTERNAL)/protobuf_install/include
 PROTOBUF_LDFLAGS = -L$(EXTERNAL)/protobuf_install/lib -Wl,-rpath=$(EXTERNAL)/protobuf_install/lib -lpthread -lprotobuf
 
@@ -67,13 +68,23 @@ build_protobuf:
 
 # 使用动态链接
 addressbook_write: $(EXAMPLE)/protobuf/addressbook_write.cpp $(EXAMPLE)/protobuf/addressbook.pb.cc
-	$(EXTERNAL)/protobuf_install/bin/protoc -I=$(EXAMPLE)/protobuf --cpp_out=$(EXAMPLE)/protobuf $(EXAMPLE)/protobuf/addressbook.proto
+	$(PROTOC) -I=$(EXAMPLE)/protobuf --cpp_out=$(EXAMPLE)/protobuf $(EXAMPLE)/protobuf/addressbook.proto
 	$(CXX20) $(CXXFLAGS) $(PROTOBUF_CFLAGS) $^ -o $(BUILD_DIR)/$@ $(PROTOBUF_LDFLAGS)
 
 # 使用静态链接
 addressbook_read: $(EXAMPLE)/protobuf/addressbook_read.cpp $(EXAMPLE)/protobuf/addressbook.pb.cc $(EXTERNAL)/protobuf_install/lib/libprotobuf.a
-	$(EXTERNAL)/protobuf_install/bin/protoc -I=$(EXAMPLE)/protobuf --cpp_out=$(EXAMPLE)/protobuf $(EXAMPLE)/protobuf/addressbook.proto
+	$(PROTOC) -I=$(EXAMPLE)/protobuf --cpp_out=$(EXAMPLE)/protobuf $(EXAMPLE)/protobuf/addressbook.proto
 	$(CXX20) $(CXXFLAGS) $(PROTOBUF_CFLAGS) $^ -o $(BUILD_DIR)/$@ -lpthread
+
+gen_rpc_proto:
+	$(PROTOC) -I=$(EXAMPLE)/rpctest/proto --cpp_out=$(EXAMPLE)/rpctest $(EXAMPLE)/rpctest/proto/EchoService.proto
+	$(PROTOC) -I=$(EXAMPLE)/rpctest/proto --cpp_out=$(EXAMPLE)/rpctest $(EXAMPLE)/rpctest/proto/RpcMeta.proto
+
+rpc_echo_cli: $(EXAMPLE)/rpctest/EchoClient.cpp $(EXAMPLE)/rpctest/RpcMeta.pb.cc $(EXAMPLE)/rpctest/EchoService.pb.cc $(EXTERNAL)/protobuf_install/lib/libprotobuf.a
+	$(CXX20) $(CXXFLAGS) $(PROTOBUF_CFLAGS) $(ASIO_CFLAGS) $^ -o $(BUILD_DIR)/$@ -lpthread
+
+rpc_echo_srv: $(EXAMPLE)/rpctest/EchoServer.cpp $(EXAMPLE)/rpctest/RpcMeta.pb.cc $(EXAMPLE)/rpctest/EchoService.pb.cc $(EXTERNAL)/protobuf_install/lib/libprotobuf.a
+	$(CXX20) $(CXXFLAGS) $(PROTOBUF_CFLAGS) $(ASIO_CFLAGS) $^ -o $(BUILD_DIR)/$@ -lpthread
 
 # =================== protobuf examples end =================== 
 

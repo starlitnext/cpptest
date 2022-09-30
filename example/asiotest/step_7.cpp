@@ -59,8 +59,6 @@ awaitable<void> transfer(tcp::socket& from, tcp::socket& to)
 awaitable<void> proxy(tcp::socket client, tcp::endpoint target)
 {
     tcp::socket server(client.get_executor());
-    steady_clock::time_point client_to_server_deadline{};
-    steady_clock::time_point server_to_client_deadline{};
 
     auto [e] = co_await server.async_connect(target, use_no_throw_awaitable);
     if (!e)
