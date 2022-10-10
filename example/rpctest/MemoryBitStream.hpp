@@ -2,7 +2,7 @@
  * @Author: silentwind vipxxq@foxmail.com
  * @Date: 2022-09-30 11:48:00
  * @LastEditors: silentwind vipxxq@foxmail.com
- * @LastEditTime: 2022-09-30 18:00:45
+ * @LastEditTime: 2022-10-08 15:40:51
  * @Description: 按bit的方式读写buffer
  */
 #ifndef MEMORY_BIT_STREAM_HPP
@@ -123,6 +123,12 @@ public:
     }
     ~OutputMemoryBitStream() { std::free(buffer_); }
 
+    void Reset() { ::memset(buffer_, 0, capacity_ >> 3); head_ = 0; }
+
+    void Skip(uint32_t bit_count) { head_ += bit_count; }
+    uint32_t GetHead() const { return head_; }
+    void SetHead(uint32_t head) { head_ = head; }
+
     void WriteBits(uint8_t in_data, size_t bit_count);
     void WriteBits(const void* in_data, size_t bit_count);
 
@@ -239,12 +245,20 @@ void OutputMemoryBitStream::WriteBits(const void* in_data, size_t bit_count)
 class InputMemoryBitStream
 {
 public:
-    InputMemoryBitStream(char* in_buffer, uint32_t bit_count):
+    InputMemoryBitStream() :
+        buffer_(nullptr),
+        capacity_(0),
+        head_(0)
+    {
+    }
+    InputMemoryBitStream(const char* in_buffer, uint32_t bit_count) :
         buffer_(in_buffer),
         capacity_(bit_count),
         head_(0)
     {
     }
+
+    void Reset(const char* in_buffer, uint32_t bit_count) { buffer_ = in_buffer; capacity_ = bit_count; head_ = 0; }
 
     const char* GetBufferPtr() const { return buffer_; }
     uint32_t GetRemainingBitCount() const { return capacity_ - head_; }
@@ -287,7 +301,7 @@ public:
     void ResetToCapacity(uint32_t byte_capacity) { capacity_ = byte_capacity << 3; head_ = 0; }
 
 private:
-    char* buffer_;
+    const char* buffer_;
     uint32_t capacity_;
     uint32_t head_;
 };
@@ -325,14 +339,14 @@ void InputMemoryBitStream::ReadBits(void* out_data, uint32_t bit_count)
 }
 
 template<typename T>
-OutputMemoryBitStream& operator >>(OutputMemoryBitStream& stream, const T& val)
+OutputMemoryBitStream& operator <<(OutputMemoryBitStream& stream, const T& val)
 {
     stream.Write(val);
     return stream;
 }
 
 template<typename T>
-InputMemoryBitStream& operator <<(InputMemoryBitStream& stream, T& val)
+InputMemoryBitStream& operator >>(InputMemoryBitStream& stream, T& val)
 {
     stream.Read(val);
     return stream;

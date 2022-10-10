@@ -2,7 +2,7 @@
  * @Author: silentwind vipxxq@foxmail.com
  * @Date: 2022-09-30 11:48:00
  * @LastEditors: silentwind vipxxq@foxmail.com
- * @LastEditTime: 2022-09-30 18:00:17
+ * @LastEditTime: 2022-10-08 10:10:28
  * @Description: 按bit的方式读写buffer
  */
 #ifndef MEMORY_BIT_STREAM_HPP
@@ -325,14 +325,14 @@ void InputMemoryBitStream::ReadBits(void* out_data, uint32_t bit_count)
 }
 
 template<typename T>
-OutputMemoryBitStream& operator >>(OutputMemoryBitStream& stream, const T& val)
+OutputMemoryBitStream& operator <<(OutputMemoryBitStream& stream, const T& val)
 {
     stream.Write(val);
     return stream;
 }
 
 template<typename T>
-InputMemoryBitStream& operator <<(InputMemoryBitStream& stream, T& val)
+InputMemoryBitStream& operator >>(InputMemoryBitStream& stream, T& val)
 {
     stream.Read(val);
     return stream;
